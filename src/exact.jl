@@ -78,19 +78,11 @@ function isdominated(A, b, islb, isfun, k, optimizer_constructor, lb, ub, epsilo
         end
     end
 
-    # update lower and upper bound if Vector
-    lbx = isa(lb, Vector) ? vcat(-Inf, lb) : lb
-    ubx = isa(ub, Vector) ? vcat(Inf, ub) : ub
-
     # solve the LP with JuMP
     model = Model(optimizer_constructor)
     z = @variable(model, [1:nx+1])
-    if lb isa Vector
-        set_lower_bound.(z, lb)
-    end
-    if ub isa Vector
-        set_upper_bound.(z, ub)
-    end
+    set_lower_bound.(z[2:end], lb)
+    set_upper_bound.(z[2:end], ub)
 
     @constraint(model, H * z .≤ h)
     @objective(model, Min, c ⋅ z)

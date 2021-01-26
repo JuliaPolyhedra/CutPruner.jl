@@ -30,6 +30,26 @@ isempty(lp_solvers) && warn("Exact Pruning tests not run!")
             exactpruning!(pruner, optimizer_constructor)
             # perform the same test again
             @test pruner.b == [10, 20]
+
+            pruner = CutPruner{1, Int}(algo, :Max)
+
+            addcuts!(pruner, [1]', [0], [true])
+            addcuts!(pruner, [-1]', [1], [true])
+            exactpruning!(pruner, optimizer_constructor, lb = 0.5)
+            @test pruner.b == [0]
+
+            addcuts!(pruner, [-1]', [1], [true])
+            exactpruning!(pruner, optimizer_constructor, lb = [0.5])
+            @test pruner.b == [0]
+
+            addcuts!(pruner, [-1]', [1], [true])
+            exactpruning!(pruner, optimizer_constructor, ub = 0.4)
+            @test pruner.b == [1]
+
+            addcuts!(pruner, [1]', [0], [true])
+            exactpruning!(pruner, optimizer_constructor, ub = [0.4])
+            @test pruner.b == [1]
+
         end
     end
     for algo in [AvgCutPruningAlgo(20), DecayCutPruningAlgo(20), DeMatosPruningAlgo(20)]
